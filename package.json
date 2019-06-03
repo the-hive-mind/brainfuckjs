@@ -13,5 +13,8 @@
     "javascript"
   ],
   "author": "thellmei",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "prompt-sync": "^4.1.7"
+  }
 }
