@@ -124,7 +124,7 @@ const interpret = (sourceCode, memory = [], pointer = 0, shouldPrint = true) => 
 
                 break;
             case ',':
-                memory[pointer] = prompt('Enter one character: ');
+                memory[pointer] = String(prompt('Enter one character: ')).charCodeAt(0);
                 break;
             default:
                 // Skipping!
