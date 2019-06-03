@@ -1,154 +1,82 @@
 const prompt = require('prompt-sync')();
 
-const increase = (memory, position) => {
-    if (memory[position] === undefined) {
-        memory[position] = 1;
-        return;
-    }
+const executeInstruction = (instructionSet, memory, pointer, output) => {
+    for (let i = 0; i < instructionSet.length; i++) {
+        const instruction = instructionSet[i];
 
-    memory[position]++;
-}
-
-const decrease = (memory, position) => {
-    if (memory[position] === undefined) {
-        memory[position] = -1;
-        return;
-    }
-
-    memory[position]--;
-}
-
-const addLog = (printLog, memory, position) => {
-    const character = String.fromCharCode(memory[position]);
-    printLog.push(character);
-    return printLog;
-};
-
-const print = (printLog) => {
-    console.info(printLog.join(''));
-}
-
-const filterSource = (sourceCode) => {
-    const instructions = sourceCode.replace(/[^\[\]\.\,\<\>\+\-]/g, '');
-    return instructions;
-}
-
-const shiftLeft = (memory, pointer) => {
-    const newPointer = pointer - 1;
-
-    if(memory[newPointer] === undefined) {
-        memory[newPointer] = 0;
-    }
-
-    return {
-        memory,
-        pointer: newPointer
-    };
-}
-
-const shiftRight = (memory, pointer) => {
-    const newPointer = pointer + 1;
-
-    if(memory[newPointer] === undefined) {
-        memory[newPointer] = 0;
-    }
-
-    return {
-        memory,
-        pointer: newPointer
-    };
-}
-
-const memoryDump = (memory) => {
-    const represenation = JSON.parse(JSON.stringify(new Int32Array(memory)));
-    console.log(represenation);
-};
-
-const interpret = (sourceCode, memory = [], pointer = 0, shouldPrint = true) => {
-    let instructions = filterSource(sourceCode); 
-    let printLog = [];
-
-    // Initial value for pointer position
-    if (memory[pointer] === undefined) {
-        memory[pointer] = 0;
-    }
-
-    while (instructions.length > 0) {
-        // obtain next character
-        const nextChar = instructions.charAt(0);
-        instructions = instructions.slice(1);
-
-        switch (nextChar) {
-            case '+': 
-                increase(memory, pointer);
-                break;
-            case '-': 
-                decrease(memory, pointer);
+        switch (instruction) {
+            case '>':
+                ++pointer;
                 break;
             case '<':
-                ({memory, pointer} = shiftLeft([...memory], pointer));
+                --pointer;
                 break;
-            case '>':
-                ({memory, pointer} = shiftRight([...memory], pointer));
+            case '+':
+                // Uint8-ified addition
+                memory[pointer] = ((memory[pointer] || 0) + 1) % 256;
+                break;
+            case '-':
+                // Uint8-ified substraction
+                memory[pointer] = ((memory[pointer] || 0) - 1) & 255;
                 break;
             case '.':
-                (printLog = addLog([...printLog], memory, pointer));
-                break;
-            case '[':
-                let openLoops = 1;
-                let charIndex = 0;
-                while (openLoops > 0) {
-                    // Another opening
-                    if (instructions.charAt(charIndex) === '[') {
-                        openLoops++;
-                    }
-                    
-                    // Another closing
-                    if (instructions.charAt(charIndex) === ']') {
-                        openLoops--;
-                    }
-
-                    if (openLoops !== 0) {
-                        charIndex++;
-                    }
-                }
-
-                const nestedLoopEnd = charIndex;            
-                const loopInstructions = instructions.slice(0, nestedLoopEnd);
-                instructions = instructions.slice(nestedLoopEnd + 1);
-
-                // Execute Loop Instructions
-                while(memory[pointer] !== 0) {
-                    ({memory, pointer} = interpret(loopInstructions, [...memory], pointer, false));
-                }
-
+                output.push(String.fromCharCode(memory[pointer]));
                 break;
             case ',':
                 memory[pointer] = String(prompt('Enter one character: ')).charCodeAt(0);
                 break;
+            case '[':
+                // Find nested loop
+                let openLoops = 1;
+                let nestedEnd;
+                for (let j = i + 1; openLoops > 0 && j < instructionSet.length; j++) {
+                    if (instructionSet[j] === '[') {
+                        ++openLoops;
+                        continue;
+                    }
+
+                    if (instructionSet[j] === ']') {
+                        --openLoops;
+                    }
+
+                    nestedEnd = j;
+                }
+
+                // Execute nested loop
+                const nestedInstructions = instructionSet.slice(i + 1, nestedEnd);
+                i = nestedEnd;
+                while (memory[pointer] !== 0) {
+                    ({pointer} = executeInstruction(nestedInstructions, memory, pointer, output));
+                }
+                break;
             default:
-                // Skipping!
+                throw new Error('Unexpected Instruction!');
         }
     }
 
-    // Print at the end if wanted...
-    if (shouldPrint) {
-        print(printLog);
-    }
-
     return {
-        memory,
         pointer,
     };
 };
 
-const inspect = (sourceCode) => {
-    const { memory, pointer} = interpret(sourceCode, [], 0, false);
-    memoryDump(memory);
-    console.log('Pointer ends at position: ', pointer);
-}
+const interpret = (instructions, memory = [], pointer = 0, output = []) => {
+    // Split instructions
+    const instructionSet = instructions.
+        replace(/[^\.\[\]\,\<\>\+\-]/g, '').
+        split('');
+
+    // execute all instructions
+    ({ pointer } = executeInstruction(instructionSet, memory, pointer, output));
+
+    // return memory, pointer
+    return {
+        memory,
+        pointer,
+        output,
+        print: () => { console.info(output.join('')); },
+    };
+};
 
 module.exports = {
-    inspect,
     interpret,
 };
