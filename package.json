@@ -15,6 +15,9 @@
   "author": "thellmei",
   "license": "ISC",
   "dependencies": {
-    "prompt-sync": "^4.1.7"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-node": "^4.0.0"
   }
 }

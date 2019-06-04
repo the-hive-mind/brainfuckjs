@@ -1,9 +1,7 @@
-const prompt = require('prompt-sync')();
-
-const executeInstruction = (instructionSet, memory, pointer, output) => {
+const executeInstruction = (instructionSet, input, memory, pointer, output) => {
     for (let i = 0; i < instructionSet.length; i++) {
         const instruction = instructionSet[i];
-
+        
         switch (instruction) {
             case '>':
                 ++pointer;
@@ -23,12 +21,13 @@ const executeInstruction = (instructionSet, memory, pointer, output) => {
                 output.push(String.fromCharCode(memory[pointer]));
                 break;
             case ',':
-                memory[pointer] = String(prompt('Enter one character: ')).charCodeAt(0);
+                const value = input.pop();
+                memory[pointer] = value ? String(value).charCodeAt(0) : 0;
                 break;
             case '[':
+                let nestedEnd, openLoops = 1;
+
                 // Find nested loop
-                let openLoops = 1;
-                let nestedEnd;
                 for (let j = i + 1; openLoops > 0 && j < instructionSet.length; j++) {
                     if (instructionSet[j] === '[') {
                         ++openLoops;
@@ -59,21 +58,24 @@ const executeInstruction = (instructionSet, memory, pointer, output) => {
     };
 };
 
-const interpret = (instructions, memory = [], pointer = 0, output = []) => {
+const interpret = (instructions, input = [], memory = [], pointer = 0, output = []) => {
     // Split instructions
     const instructionSet = instructions.
-        replace(/[^\.\[\]\,\<\>\+\-]/g, '').
+        replace(/[^\.\[\],<>+-]/g, '').
         split('');
 
+    // reverse input
+    input.reverse();
+
     // execute all instructions
-    ({ pointer } = executeInstruction(instructionSet, memory, pointer, output));
+    ({ pointer } = executeInstruction(instructionSet, input, memory, pointer, output));
 
     // return memory, pointer
     return {
         memory,
         pointer,
         output,
-        print: () => { console.info(output.join('')); },
+        print: () => { process.stdout.write(output.join('')); },
     };
 };
 
