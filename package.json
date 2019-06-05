@@ -1,16 +1,23 @@
 {
-  "name": "brainfuckjs",
-  "version": "0.0.1",
-  "description": "Simple brainfuck interpreter",
+  "name": "jsbrainfuck",
+  "version": "0.0.2",
+  "description": "JavaScript Brainfuck Tools",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/the-hive-mind/brainfuckjs.git"
   },
   "keywords": [
     "brainfuck",
     "js",
     "interpreter",
-    "javascript"
+    "javascript",
+    "compiler",
+    "library",
+    "cli"
   ],
   "author": "thellmei",
   "license": "ISC",
