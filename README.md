@@ -21,7 +21,7 @@ Using `brainfuckjs` as a library, you can either use the `interpret` or the `com
 ### compile example
 ```js
     const { compile } = require('jsbrainfuck');
-    const { code } = interpret(
+    const { code } = compile(
         // program
         '+++++ +++++ [> +++++ +++ < -].,.',
     );
