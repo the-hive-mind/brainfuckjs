@@ -14,10 +14,12 @@
   ],
   "author": "thellmei",
   "license": "ISC",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-node": "^4.0.0"
+  },
+  "bin": {
+    "bfjs": "cli.js"
   }
 }

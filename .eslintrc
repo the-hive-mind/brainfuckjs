@@ -1,0 +1,10 @@
+{
+    "extends": ["node"],
+    "rules": {
+        "no-case-declarations": "off",
+        "no-useless-escape": "off",
+        "import/no-commonjs": "off",
+        "import/no-nodejs-modules": "off",
+        "no-sync": "off"
+    }
+}
