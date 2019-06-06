@@ -1,6 +1,6 @@
 {
   "name": "jsbrainfuck",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "JavaScript Brainfuck Tools",
   "main": "index.js",
   "scripts": {
